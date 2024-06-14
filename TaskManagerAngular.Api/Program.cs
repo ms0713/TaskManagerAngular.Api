@@ -10,7 +10,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddPersistence(builder.Configuration);
+builder.Services
+    .AddPersistence(builder.Configuration)
+    .AddIdentity(builder.Configuration)
+    .AddJwtAuthentication(builder.Configuration)
+    .AddAntiforgeryConfig(builder.Configuration);
 
 builder.Services.AddCors(o => o.AddPolicy("MyPolicy", builder =>
 {
@@ -34,8 +38,11 @@ if (app.Environment.IsDevelopment())
 //app.UseHttpsRedirection();
 app.UseCors("MyPolicy");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+await app.UseDefaultRoleGenerationAsync();
 
 app.Run();

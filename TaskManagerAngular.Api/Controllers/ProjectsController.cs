@@ -1,11 +1,13 @@
-using Azure.Core;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TaskManagerAngular.Api.Data;
 using TaskManagerAngular.Api.Models;
 
 namespace TaskManagerAngular.Api.Controllers;
+
+[Authorize]
 [ApiController]
 [Route("api/[controller]")]
 public class ProjectsController : ControllerBase
@@ -56,13 +58,13 @@ public class ProjectsController : ControllerBase
     {
         List<Project> projects = null;
         if (searchBy == "Id")
-            projects = m_DbContext.Set<Project>().Where(temp => temp.Id.ToString().Contains(searchText)).ToList();
+            projects = m_DbContext.Projects.Where(temp => temp.Id.ToString().Contains(searchText)).ToList();
         else if (searchBy == "Name")
-            projects = m_DbContext.Set<Project>().Where(temp => temp.Name.Contains(searchText)).ToList();
+            projects = m_DbContext.Projects.Where(temp => temp.Name.Contains(searchText)).ToList();
         if (searchBy == "DateOfStart")
-            projects = m_DbContext.Set<Project>().Where(temp => temp.DateOfStart.ToString().Contains(searchText)).ToList();
+            projects = m_DbContext.Projects.Where(temp => temp.DateOfStart.ToString().Contains(searchText)).ToList();
         if (searchBy == "TeamSize")
-            projects = m_DbContext.Set<Project>().Where(temp => temp.TeamSize.ToString().Contains(searchText)).ToList();
+            projects = m_DbContext.Projects.Where(temp => temp.TeamSize.ToString().Contains(searchText)).ToList();
 
         return projects;
     }
@@ -70,7 +72,7 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<Project> PostAsync([FromBody] Project project)
     {
-        m_DbContext.Set<Project>().Add(project);
+        m_DbContext.Projects.Add(project);
         m_DbContext.SaveChanges();
 
         return project;
@@ -79,7 +81,7 @@ public class ProjectsController : ControllerBase
     [HttpPut]
     public async Task<Project?> PutAsync([FromBody] Project project, CancellationToken cancellationToken)
     {
-        Project? existingProject = await m_DbContext.Set<Project>()
+        Project? existingProject = await m_DbContext.Projects
             .FirstOrDefaultAsync(temp => temp.Id == project.Id, cancellationToken);
 
         if (existingProject is not null)
@@ -99,7 +101,7 @@ public class ProjectsController : ControllerBase
     [HttpDelete]
     public async Task<int> DeleteAsync(int projectId, CancellationToken cancellationToken)
     {
-        Project? project = await m_DbContext.Set<Project>()
+        Project? project = await m_DbContext.Projects
             .FirstOrDefaultAsync(temp => temp.Id == projectId, cancellationToken);
 
         if (project is not null)
